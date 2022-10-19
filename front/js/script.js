@@ -1,6 +1,6 @@
 let itemsData = [];
  
-// API
+//----------------------------------------------------------recuperation de l'api
 const fetchItems = async () => {
   await fetch("http://localhost:3000/api/products")
     .then((res) => res.json())
@@ -8,7 +8,7 @@ const fetchItems = async () => {
     .catch((error) => console.log(error));
 };
  
-// Affichage des items
+//---------------------------------------------------------------- Affichage des items
 const itemsShow = async () => {
   await fetchItems();
  
