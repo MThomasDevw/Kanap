@@ -8,11 +8,11 @@ const cart = [];
 console.log(cart);
 //------------------------------------------------------- récuperation fichier local storage
 for (let i = 0; i < productInLocalStorage.length; i++) {
-  cart.push(productInLocalStorage[i].idProduct);
+  cart.push(productInLocalStorage[i].id);
   // console.log(productInLocalStorage.length)
   // -----------------------------------------------------Récuperation de l'Api
   fetch(
-    `http://localhost:3000/api/products/${productInLocalStorage[i].idProduct}`
+    `http://localhost:3000/api/products/${productInLocalStorage[i].id}`
   ).then((reponse) => {
     const itemData = reponse.json();
     itemData.then((product) => {
@@ -20,7 +20,7 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
       // ------------------------------------------------Ajout du code Html dans la page
       affProduct.insertAdjacentHTML(
         "afterbegin",
-        `<article class="cart__item" data-id="${productInLocalStorage[i].idProduct}" data-color="${productInLocalStorage[i].color}">
+        `<article class="cart__item" data-id="${productInLocalStorage[i].id}" data-color="${productInLocalStorage[i].color}">
     <div class="cart__item__img">
       <img src="${product.imageUrl}" alt="${product.altTxt}">
     </div>
@@ -50,11 +50,11 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
         btnDelete[j].addEventListener("click", (event) => {
           event.preventDefault();
           console.log(event);
-          let idDelete = productInLocalStorage[j].idProduct;
+          let idDelete = productInLocalStorage[j].id;
           console.log(idDelete);
 
           productInLocalStorage = productInLocalStorage.filter(
-            (el) => el.idProduct !== idDelete
+            (el) => el.id !== idDelete
           );
           console.log(productInLocalStorage);
 
@@ -132,7 +132,47 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
           city: document.getElementById("city").value,
           email: document.getElementById("email").value,
         };
-        console.log(cartOrder)
+        if (
+          firstName.value === "" ||
+          lastName.value === "" ||
+          address.value === "" ||
+          city.value === "" ||
+          email.value === ""
+        ) {
+          alert(
+            "Vous devez renseigner vos coordonnées pour passer la commande !"
+          );
+        } else {
+          let products = [];
+          productInLocalStorage.forEach((order) => {
+            products.push(order.id);
+            console.log(products);
+          });
+
+          let pageOrder = { cartOrder, products };
+          
+          console.log(pageOrder);
+          // Appel à l'api order pour envoyer les tableaux
+          fetch("http://localhost:3000/api/products/order", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify(pageOrder),
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((confirm) => {
+            window.location.href = "./confirmation.html?orderId=" + confirm.orderId;
+            localStorage.clear();
+            console.log(confirm)
+          })
+          .catch((error) => {
+            console.log("une erreur est survenue");
+          });
+        }
       });
     });
   });

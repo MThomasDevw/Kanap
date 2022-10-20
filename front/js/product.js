@@ -57,7 +57,7 @@ if (button != null) {
     // console.log()
     //------------------------------- creation d'une constante pour afficher les elements dans le localstorage
     const data = {
-      idProduct: id,
+      id: id,
       color: color,
       quantity: quantity,
     };
