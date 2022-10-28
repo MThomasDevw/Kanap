@@ -19,7 +19,7 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
       console.log(product);
       // ------------------------------------------------Ajout du code Html dans la page
       affProduct.insertAdjacentHTML(
-        "afterbegin",
+        "beforeend",
         `<article class="cart__item" data-id="${productInLocalStorage[i].id}" data-color="${productInLocalStorage[i].color}">
     <div class="cart__item__img">
       <img src="${product.imageUrl}" alt="${product.altTxt}">
@@ -43,27 +43,26 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
     </article>`
       );
       //--------------------------------------------------------Supprimer les produits
-      let btnDelete = document.getElementsByClassName("deleteItem");
+      let btnDelete = document.querySelectorAll(".deleteItem");
       console.log(btnDelete);
 
-      for (let j = 0; j < btnDelete.length; j++) {
-        btnDelete[j].addEventListener("click", (event) => {
-          event.preventDefault();
-          console.log(event);
-          let idDelete = productInLocalStorage[j].id;
-          console.log(idDelete);
+      btnDelete[i].addEventListener("click", (event) => {
+        event.preventDefault();
+        console.log(event);
+        let idDelete = productInLocalStorage[i].id;
+        let colorDelete = productInLocalStorage[i].color;
+        console.log(idDelete);
 
-          productInLocalStorage = productInLocalStorage.filter(
-            (el) => el.id !== idDelete
-          );
-          console.log(productInLocalStorage);
+        productInLocalStorage = productInLocalStorage.filter(
+          el => ( el.id !== idDelete || el.color !== colorDelete)
+        );
+        console.log(productInLocalStorage);
+        localStorage.setItem("panier", JSON.stringify(productInLocalStorage));
 
-          localStorage.setItem("panier", JSON.stringify(productInLocalStorage));
+        alert("Le produit a été supprimer du panier");
+        window.location.href = "cart.html";
+      });
 
-          alert("Le produit a été supprimer du panier");
-          window.location.href = "cart.html";
-        });
-      }
       // -------------------------------------------------Modifier la quantité des produits
       let result = document.querySelectorAll(".itemQuantity");
       console.log(result);
@@ -106,7 +105,13 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
       let emailRegExp = new RegExp(
         "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$"
       );
-      const emailErrorMsg = document.querySelector("#emailErrorMsg");
+      let regularRegExp = new RegExp("^[a-zA-Z ,.'-]+$");
+      let addressRegExp = new RegExp("^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+");
+
+      const firstName = document.getElementById("firstName");
+      const lastName = document.getElementById("lastName");
+      const address = document.getElementById("address");
+      const city = document.getElementById("city");
       const email = document.querySelector("#email");
 
       email.addEventListener("input", (event) => {
@@ -120,18 +125,29 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
           return true;
         }
       });
-
+      firstName.addEventListener("input", (event) => {
+        event.preventDefault();
+        if (regularRegExp.test(firstName.value) == false || firstName.value == "") {
+          document.getElementById("firstNameErrorMsg").innerHTML =
+            "Veuillez renseigner votre prénom";
+          return false;
+        } else {
+          document.getElementById("firstNameErrorMsg").innerHTML = "";
+          return true;
+        }
+      });
       let order = document.getElementById("order");
       order.addEventListener("click", (e) => {
         e.preventDefault();
 
         const cartOrder = {
-          firstName: document.getElementById("firstName").value,
-          lastName: document.getElementById("lastName").value,
-          address: document.getElementById("address").value,
-          city: document.getElementById("city").value,
-          email: document.getElementById("email").value,
+          firstName: firstName.value,
+          lastName: lastName.value,
+          address: address.value,
+          city: city.value,
+          email: email.value,
         };
+        console.log(cartOrder);
         if (
           firstName.value === "" ||
           lastName.value === "" ||
@@ -142,36 +158,30 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
           alert(
             "Vous devez renseigner vos coordonnées pour passer la commande !"
           );
+          return;
         } else {
           let products = [];
-          productInLocalStorage.forEach((order) => {
-            products.push(order.id);
-            console.log(products);
-          });
+          for (let j = 0; j < productInLocalStorage.length; j++) {
+            products.push(productInLocalStorage[j].id);
+          }
 
-          let pageOrder = { cartOrder, products };
-          
-          console.log(pageOrder);
-          // Appel à l'api order pour envoyer les tableaux
+          let formData = {
+            products: products,
+            contact: cartOrder,
+          };
+
           fetch("http://localhost:3000/api/products/order", {
             method: "POST",
+            body: JSON.stringify(formData),
             headers: {
-              Accept: "application/json",
-              "Content-type": "application/json",
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify(pageOrder),
           })
-          .then((res) => {
-            return res.json();
-          })
-          .then((confirm) => {
-            window.location.href = "./confirmation.html?orderId=" + confirm.orderId;
-            localStorage.clear();
-            console.log(confirm)
-          })
-          .catch((error) => {
-            console.log("une erreur est survenue");
-          });
+            .then((res) => res.json())
+            .then((data) => {
+              window.location.href = "./confirmation.html?id=" + data.orderId;
+              localStorage.clear()
+            });
         }
       });
     });
