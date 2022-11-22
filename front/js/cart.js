@@ -2,6 +2,8 @@ let productInLocalStorage = JSON.parse(localStorage.getItem("panier"));
 console.log(productInLocalStorage);
 
 const affProduct = document.querySelector("#cart__items");
+const deleteMessage = document.querySelector("#firstNameErrorMsg");
+const quantityMoinsUn =document.querySelector('#itemQuantity');
 // console.log(affProduct)
 
 const cart = [];
@@ -75,12 +77,21 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
 
           resultFind.quantity = quantityModifValue;
 
-          localStorage.setItem("panier", JSON.stringify(productInLocalStorage));
-          alert("la quantité a été modifier");
+          if (quantityModifValue <= 0){
+            alert ('merci de sélectionner un nombre supérieur à 0')
+            
+          }
+          else{
+            localStorage.setItem("panier", JSON.stringify(productInLocalStorage));
+          alert("La quantité a été modifier");
           window.location.href = "cart.html";
+          }
+      
         });
+        
       }
 
+    
       // ---------------------------------------------calcul de la quantité des produits présent dans le panier
       let itemQuantity = document.querySelectorAll(".itemQuantity");
       let selectQuantity = itemQuantity.length;
@@ -101,7 +112,8 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
       productTotalPrice.innerHTML = totalPrice;
 
       // -------------------------------------------------------recuperation de la partie formulaire
-
+      deleteMessage.textContent = '' ;
+      
       let emailRegExp = new RegExp(
         "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$"
       );
@@ -118,7 +130,7 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
         event.preventDefault();
         if (emailRegExp.test(email.value) == false || email.value == "") {
           document.getElementById("emailErrorMsg").innerHTML =
-            "veuillez saisir une adresse mail valide";
+            "Veuillez saisir une adresse mail valide";
           return false;
         } else {
           document.getElementById("emailErrorMsg").innerHTML = "";
@@ -129,13 +141,47 @@ for (let i = 0; i < productInLocalStorage.length; i++) {
         event.preventDefault();
         if (regularRegExp.test(firstName.value) == false || firstName.value == "") {
           document.getElementById("firstNameErrorMsg").innerHTML =
-            "Veuillez renseigner votre prénom";
+            "Veuillez renseigner votre prénom avec seulement des majuscules et minuscules";
           return false;
         } else {
           document.getElementById("firstNameErrorMsg").innerHTML = "";
           return true;
         }
       });
+      lastName.addEventListener("input", (event) => {
+        event.preventDefault();
+        if (regularRegExp.test(lastName.value) == false || lastName.value == "") {
+          document.getElementById("lastNameErrorMsg").innerHTML =
+            "Veuillez renseigner votre nom avec seulement des majuscules et minuscules";
+          return false;
+        } else {
+          document.getElementById("lastNameErrorMsg").innerHTML = "";
+          return true;
+        }
+      });
+      address.addEventListener("input", (event) => {
+        event.preventDefault();
+        if (addressRegExp.test(address.value) == false || address.value == "") {
+          document.getElementById("addressErrorMsg").innerHTML =
+            "Veuillez renseigner votre adresse";
+          return false;
+        } else {
+          document.getElementById("addressErrorMsg").innerHTML = "";
+          return true;
+        }
+      });
+      city.addEventListener("input", (event) => {
+        event.preventDefault();
+        if (regularRegExp.test(city.value) == false || city.value == "") {
+          document.getElementById("cityErrorMsg").innerHTML =
+            "Veuillez renseigner votre ville avec seulement des majuscules et minuscules";
+          return false;
+        } else {
+          document.getElementById("cityErrorMsg").innerHTML = "";
+          return true;
+        }
+      });
+      
       let order = document.getElementById("order");
       order.addEventListener("click", (e) => {
         e.preventDefault();

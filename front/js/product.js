@@ -1,7 +1,7 @@
 //----------------------------------------------------- recupération id
-var str = "http://localhost:3000/api/products";
-var url = new URL(location.href);
-var id = url.searchParams.get("id");
+let str = "http://localhost:3000/api/products";
+let url = new URL(location.href);
+let id = url.searchParams.get("id");
 
 // console.log(id);
 
@@ -10,10 +10,10 @@ fetch(`http://localhost:3000/api/products/${id}`)
     // console.log(reponse)
 
     //-------------------------------- création constente pour recuperer les id a afficher
-    const affichage_priceKanap = document.getElementById("price");
-    const affichage_titleKanap = document.getElementById("title");
-    const affichage_descriptionKanap = document.getElementById("description");
-    const affichage_imgKanap = document.getElementsByClassName("item__img")[0];
+    const affichagePriceKanap = document.getElementById("price");
+    const affichageTitleKanap = document.getElementById("title");
+    const affichageDescriptionKanap = document.getElementById("description");
+    const affichageImgKanap = document.getElementsByClassName("item__img")[0];
 
     // console.log();
 
@@ -23,12 +23,12 @@ fetch(`http://localhost:3000/api/products/${id}`)
       // console.log(product)
 
       //--------------------------------------------- affichage des élements du produits
-      affichage_priceKanap.innerHTML = product.price;
-      affichage_titleKanap.innerHTML = product.name;
-      affichage_descriptionKanap.innerHTML = product.description;
+      affichagePriceKanap.innerHTML = product.price;
+      affichageTitleKanap.innerHTML = product.name;
+      affichageDescriptionKanap.innerHTML = product.description;
 
-      const img_imageUrl = `<img src="${product.imageUrl}" alt ="${product.altTxt}">`;
-      affichage_imgKanap.insertAdjacentHTML("afterbegin", img_imageUrl);
+      const imgImageUrl = `<img src="${product.imageUrl}" alt ="${product.altTxt}">`;
+      affichageImgKanap.insertAdjacentHTML("afterbegin", imgImageUrl);
 
       // console.log();
       //----------------------------------------------- affichage des couleurs
@@ -49,11 +49,14 @@ if (button != null) {
   button.addEventListener("click", () => {
     const color = document.getElementById("colors").value;
     const quantity = document.getElementById("quantity").value;
-    if (color == null || color == "" || quantity == null || quantity == 0) {
+    if (color == null || color == "" || quantity == null || quantity == 0 ) {
       alert("merci de sélectionner une couleur et une quantité");
       return;
     }
-
+    if (quantity < 0){
+      alert("veuillez renseigner un nombrer superieur a 0")
+      return
+    }
     // console.log()
     //------------------------------- creation d'une constante pour afficher les elements dans le localstorage
     const data = {
@@ -63,20 +66,27 @@ if (button != null) {
     };
     //-------------------------------------------- ajout des produits dans le panier
     let productInLocalStorage = JSON.parse (localStorage.getItem("panier"));
-    console.log (productInLocalStorage);
-    //---------------------------------------------------- si le panier est plein
-    if(productInLocalStorage){
-        productInLocalStorage.push(data);
-        localStorage.setItem("panier",JSON.stringify(productInLocalStorage));
-        console.log(productInLocalStorage)
+    
+    // let produitExistant = productInLocalStorage.find(product=>(product.id==data.id && product.color==data.color));
+    if (!productInLocalStorage){
+      productInLocalStorage = []
     }
-    //---------------------------------------------------- si le panier est vide
-    else{
-        productInLocalStorage = [];
-        productInLocalStorage.push(data);
-        localStorage.setItem("panier",JSON.stringify(productInLocalStorage));
-        console.log(productInLocalStorage)
+    const foundProduct = productInLocalStorage.find((product)=>{
+      if (product.color == data.color && product.id == data.id)
+      {
+        return product
+      }
+    })
+    if (foundProduct)
+    {
+      foundProduct.quantity = parseInt(foundProduct.quantity) + parseInt(data.quantity);
     }
-    window.location.href = "cart.html";
+    else 
+    {  
+        productInLocalStorage.push(data)
+    }
+    localStorage.setItem("panier",JSON.stringify(productInLocalStorage));
+
+    alert("produit ajouté au panier");
   });
 }
